@@ -1,45 +1,41 @@
-#include <iostream>
+#include "main.h"
 
-#ifdef STATIC_BUILD
-#include "std_dllapi.h"
-#else
-#ifdef __cplusplus
-extern "C"{
-#endif
-
-void PrScrn();
-
-#ifdef __cplusplus
-}
-#endif
-
-#include <windows.h>
-#include <gdiplus.h>
-
-#endif
-
-using namespace std;
-
-int main()
+int main(int argc, char *argv[])
 {
+    QApplication a(argc, argv);
+
+    // Task parented to the application so that it
+    // will be deleted by the application.
+    Task *task = new Task(&a);
+
+    // This will cause the application to exit when
+    // the task signals finished.
+    QObject::connect(task, SIGNAL(finished()), &a, SLOT(quit()));
+
+    // This will run the task from the application event loop.
+    QTimer::singleShot(0, task, SLOT(run()));
+
+    return a.exec();
+}
+
+void Task::run()
+{
+    // Do processing here
     // prevent from command console popup
     FreeConsole();
-
-#ifdef STATIC_BUILD
-    Function<void> f("PrScrn.dll", "PrScrn");
-    f();
-#else
     ULONG_PTR m_gdiplusToken;   // class member
-
     // InitInstance
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
-
     PrScrn();
-
     // ExitInstance
     Gdiplus::GdiplusShutdown(m_gdiplusToken);
-#endif
 
-    return 0;
+    QStringList args = QCoreApplication::arguments();
+    if (args.count() > 1) {
+        const QString filePath = QCoreApplication::arguments().at(1);
+        saveClipboardImage(filePath);
+    }
+
+    emit finished();
 }

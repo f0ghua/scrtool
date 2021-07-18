@@ -1,7 +1,8 @@
 TEMPLATE = app
 CONFIG += console c++11
 CONFIG -= app_bundle
-CONFIG -= qt
+CONFIG += qt
+QT += widgets
 
 SOURCES += \
         main.cpp
@@ -12,3 +13,6 @@ DESTDIR = $$TOPBUILDDIR/output
 
 LIBDIR = $$DESTDIR
 LIBS += -L$$LIBDIR -lPrScrn -lgdiplus
+
+HEADERS += \
+    main.h
